@@ -12,77 +12,53 @@ PIO_WORKITEM	pIoWorkItem = { 0 };
 PDEVICE_OBJECT	g_pDeviceObject = NULL;
 
 
-
-
-VOID
-MyWorkItem(
+VOID MyWorkItem(
 	_In_ PDEVICE_OBJECT DeviceObject,
 	_In_opt_ PVOID Context
 )
 {
-
 	KdPrint(("My Driver: My Work Item!\n"));
-
 }
 
 
-
-
-VOID
-CustomDpc(
+VOID CustomDpc(
 	_In_ struct _KDPC* Dpc,
 	_In_opt_ PVOID DeferredContext,
 	_In_opt_ PVOID SystemArgument1,
 	_In_opt_ PVOID SystemArgument2
 )
 {
-
-	// Ê¹ÓÃIoAllocateWorkItem·ÖÅäÒ»¸öioworkitem  
+	// ä½¿ç”¨IoAllocateWorkItemåˆ†é…ä¸€ä¸ªioworkitem  
 	pIoWorkItem = IoAllocateWorkItem(g_pDeviceObject);
 	// IoInitializeWorkItem(DeviceObject,pIoWorkItem); 
 
 	 if (pIoWorkItem)
 	 {
-	     //²åÈëÒ»¸öworkitem£¬ ÆäÖÐTestFile¾ÍÊÇÎÒÒªÐ´ÎÄ¼þµÄº¯Êý£¬µÚËÄ¸ö²ÎÊýÒ²ÊÇ¸Ãº¯ÊýµÄ²ÎÊý
+	     //æ’å…¥ä¸€ä¸ªworkitemï¼Œ å…¶ä¸­TestFileå°±æ˜¯æˆ‘è¦å†™æ–‡ä»¶çš„å‡½æ•°ï¼Œç¬¬å››ä¸ªå‚æ•°ä¹Ÿæ˜¯è¯¥å‡½æ•°çš„å‚æ•°
 	     IoQueueWorkItem(pIoWorkItem, (PIO_WORKITEM_ROUTINE)MyWorkItem, DelayedWorkQueue, NULL);
 	 }
-
-	 //ÓÉÓÚÒª¶¨Ê±Ð´£¬Òò´ËÔÙ´ÎÉèÖÃ¶¨Ê±Æ÷£¬Èç¹û²»ÉèÖÃÖ»Ð´Ò»´Î
+	 
+	 //ç”±äºŽè¦å®šæ—¶å†™ï¼Œå› æ­¤å†æ¬¡è®¾ç½®å®šæ—¶å™¨ï¼Œå¦‚æžœä¸è®¾ç½®åªå†™ä¸€æ¬¡
 	 KeSetTimer(&Timer, DueTime, Dpc);
-
 }
 
 
-
-
-
-
-_IRQL_requires_same_
-_Function_class_(KSTART_ROUTINE)
-VOID
-MySystemThread(
+_IRQL_requires_same_ _Function_class_(KSTART_ROUTINE) VOID MySystemThread(
 	_In_ PVOID StartContext
 )
 {
-
 	DueTime = RtlConvertLongToLargeInteger(-10 * 1000 * 1000);
-	//³õÊ¼»¯Ò»¸öDpc
-	//Õâ¸öCustomDpcÊÇ×Ô¶¨ÒåµÄº¯Êý£¬ÔËÐÐÔÚDISPATCH_LEVELÉÏ,ºóÃæµÄ²ÎÊýmyInfoÊÇ¸Ãº¯ÊýµÄ²ÎÊý
+	//åˆå§‹åŒ–ä¸€ä¸ªDpc
+	//è¿™ä¸ªCustomDpcæ˜¯è‡ªå®šä¹‰çš„å‡½æ•°ï¼Œè¿è¡Œåœ¨DISPATCH_LEVELä¸Š,åŽé¢çš„å‚æ•°myInfoæ˜¯è¯¥å‡½æ•°çš„å‚æ•°
 	KeInitializeDpc(&Dpc, (PKDEFERRED_ROUTINE)CustomDpc, NULL);
-	 //ÉèÖÃDPC¶¨Ê±Æ÷
+	 //è®¾ç½®DPCå®šæ—¶å™¨
 	KeSetTimer(&Timer, DueTime, &Dpc);
-	  //µÈ´ý¶¨Ê±Æ÷
+	  //ç­‰å¾…å®šæ—¶å™¨
 	KeWaitForSingleObject(&Timer, Executive, KernelMode, FALSE, NULL);
-
 }
 
 
-
-
-
-
-NTSTATUS
-MyDeviceIo(
+NTSTATUS MyDeviceIo(
 	_In_ PDEVICE_OBJECT pDeviceObject,
 	_In_ PIRP	pIrp
 )
@@ -94,7 +70,7 @@ MyDeviceIo(
 
 	ULONG ret_len = 0;
 
-	// ´¦ÀíDeviceIoControl¡£
+	// å¤„ç†DeviceIoControlã€‚
 	PVOID buffer = pIrp->AssociatedIrp.SystemBuffer;
 
 	ULONG inlen = irpsp->Parameters.DeviceIoControl.InputBufferLength;
@@ -129,15 +105,12 @@ MyDeviceIo(
 			     (PKSTART_ROUTINE)MySystemThread,
 			     NULL
 			     );
-
 		break;
 	}
 	default:
 		break;
 	}
 	
-
-
 	pIrp->IoStatus.Information = ret_len;
 
 	pIrp->IoStatus.Status = status;
@@ -145,18 +118,12 @@ MyDeviceIo(
 	IoCompleteRequest(pIrp, IO_NO_INCREMENT);
 
 	return status;
-
 }
 
 
-
-
-
-
-NTSTATUS
-Dispatch(
+NTSTATUS Dispatch(
 	_In_ PDEVICE_OBJECT pDeviceObject,
-	_In_ PIRP	pIrp
+	_In_ PIRP pIrp
 )
 {
 
@@ -169,6 +136,3 @@ Dispatch(
 	return STATUS_SUCCESS;
 
 }
-
-
-
