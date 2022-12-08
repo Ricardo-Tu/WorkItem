@@ -1,12 +1,12 @@
 #include "common.h"	
 
+
 NTSTATUS CreateDevice(_In_ PDRIVER_OBJECT pDriverObject);
 
-
-
-VOID	UnloadMyDriver(_In_ PDRIVER_OBJECT pDriverObject)
+VOID UnloadMyDriver(
+	_In_ PDRIVER_OBJECT pDriverObject
+	)
 {
-
 	UNICODE_STRING	symlinkname = { 0 };
 
 	RtlInitUnicodeString(&symlinkname, L"\\??\\MyLinkName");
@@ -24,19 +24,14 @@ VOID	UnloadMyDriver(_In_ PDRIVER_OBJECT pDriverObject)
 	}
 
 	KdPrint(("My Driver:Unload...\n"));
-
 }
 
 
-
-EXTERN_C
-NTSTATUS
-DriverEntry(
+EXTERN_C NTSTATUS DriverEntry(
 	_In_	PDRIVER_OBJECT pDriverObject,
 	_In_	PUNICODE_STRING	pRegistryPath
 )
 {
-
 	NTSTATUS	status = STATUS_SUCCESS;
 
 	for (ULONG i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; i++)
@@ -55,14 +50,11 @@ DriverEntry(
 
 
 	return STATUS_SUCCESS;
-
 }
-
 
 
 NTSTATUS CreateDevice(_In_ PDRIVER_OBJECT pDriverObject)
 {
-
 	NTSTATUS status = STATUS_SUCCESS;
 
 	UNICODE_STRING devicename = { 0 };
@@ -75,7 +67,7 @@ NTSTATUS CreateDevice(_In_ PDRIVER_OBJECT pDriverObject)
 
 	RtlInitUnicodeString(&symlinkname, L"\\??\\MyLinkName");
 
-	// Éú³ÉÒ»¸ö¿ØÖÆÉè±¸¶ÔÏó¡£
+	// ç”Ÿæˆä¸€ä¸ªæŽ§åˆ¶è®¾å¤‡å¯¹è±¡ã€‚
 	status = IoCreateDevice(
 		pDriverObject,
 		0, 
@@ -88,7 +80,7 @@ NTSTATUS CreateDevice(_In_ PDRIVER_OBJECT pDriverObject)
 	if (!NT_SUCCESS(status))
 		return status;
 
-	// Éú³É·ûºÅÁ´½Ó.
+	// ç”Ÿæˆç¬¦å·é“¾æŽ¥.
 	IoDeleteSymbolicLink(&symlinkname);
 
 	status = IoCreateSymbolicLink(&symlinkname, &devicename);
@@ -107,33 +99,4 @@ NTSTATUS CreateDevice(_In_ PDRIVER_OBJECT pDriverObject)
 	KdPrint(("My Driver:Create Device Success!\n"));
 
 	return status;
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
