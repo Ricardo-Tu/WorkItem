@@ -46,17 +46,3 @@ int _tmain(void)
 	return 0;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
